@@ -45,3 +45,12 @@ scrape_configs:
     labels:
       environment: 'dev'
       instance_role: 'app'
+
+# Node Exporter de la EC2 monitoring-logs
+# REEMPLAZAR IP: output de Terraform → monitoring_logs_private_ip (instancia thaqhiri-dev-monitoring-logs)
+- job_name: 'node-exporter-monitoring-logs'
+  static_configs:
+  - targets: [ '10.0.1.92:9100' ]
+    labels:
+      environment: 'dev'
+      instance_role: 'monitoring-logs'
