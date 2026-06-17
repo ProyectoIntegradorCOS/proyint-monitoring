@@ -65,6 +65,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.MONITORING_CORE_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Crear directorio en monitoring-core
+        run: ssh ec2-user@${{ secrets.MONITORING_CORE_HOST }} "mkdir -p /opt/monitoring/core"
+
       - name: Copiar archivos a monitoring-core
         run: |
           rsync -avz --delete monitoring-core/ \
@@ -97,6 +100,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.MONITORING_LOGS_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Crear directorio en monitoring-logs
+        run: ssh ec2-user@${{ secrets.MONITORING_LOGS_HOST }} "mkdir -p /opt/monitoring/logs"
+
       - name: Copiar archivos a monitoring-logs
         run: |
           rsync -avz --delete monitoring-logs/ \
@@ -128,6 +134,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.APP_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Crear directorio en app EC2
+        run: ssh ec2-user@${{ secrets.APP_HOST }} "mkdir -p /opt/monitoring/app"
 
       - name: Copiar archivos a app EC2
         run: |
