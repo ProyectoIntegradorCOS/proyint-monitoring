@@ -76,7 +76,7 @@ jobs:
       - name: Levantar stack en monitoring-core
         run: |
           ssh ec2-user@${{ secrets.MONITORING_CORE_HOST }} \
-            "cd /opt/monitoring/core && docker-compose pull && docker-compose up -d"
+            "cd /opt/monitoring/core && docker-compose pull && docker-compose up -d && docker-compose restart grafana"
 
   # ── Deploy monitoring-logs — solo en merge a main o dispatch ────────────────
   deploy-logs:
