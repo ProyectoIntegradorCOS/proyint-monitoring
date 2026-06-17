@@ -147,3 +147,31 @@ jobs:
         run: |
           ssh ec2-user@${{ secrets.APP_HOST }} \
             "cd /opt/monitoring/app && docker-compose pull && docker-compose up -d"
+
+  # ── Resumen de URLs — corre tras los 3 deploys ───────────────────────────────
+  summary:
+    name: URLs de acceso
+    runs-on: ubuntu-latest
+    needs: [deploy-core, deploy-logs, deploy-app-agents]
+
+    if: |
+      (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Mostrar URLs de los servicios
+        run: |
+          echo "## Monitoreo desplegado" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### monitoring-core" >> $GITHUB_STEP_SUMMARY
+          echo "| Servicio | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Grafana | http://${{ secrets.MONITORING_CORE_HOST }}:3000 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Prometheus | http://${{ secrets.MONITORING_CORE_HOST }}:9090 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Alertmanager | http://${{ secrets.MONITORING_CORE_HOST }}:9093 |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### monitoring-logs" >> $GITHUB_STEP_SUMMARY
+          echo "| Servicio | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loki | http://${{ secrets.MONITORING_LOGS_HOST }}:3100 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Jaeger UI | http://${{ secrets.MONITORING_LOGS_HOST }}:16686 |" >> $GITHUB_STEP_SUMMARY
