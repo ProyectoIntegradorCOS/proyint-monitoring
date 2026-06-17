@@ -30,16 +30,18 @@ jobs:
       - name: Validar configuración de Prometheus
         run: |
           docker run --rm \
+            --entrypoint promtool \
             -v ${{ github.workspace }}/monitoring-core/prometheus:/prometheus \
             prom/prometheus:latest \
-            promtool check config /prometheus/prometheus.yml
+            check config /prometheus/prometheus.yml
 
       - name: Validar configuración de Alertmanager
         run: |
           docker run --rm \
+            --entrypoint amtool \
             -v ${{ github.workspace }}/monitoring-core/alertmanager:/alertmanager \
             prom/alertmanager:latest \
-            amtool check-config /alertmanager/alertmanager.yml
+            check-config /alertmanager/alertmanager.yml
 
   # ── Deploy monitoring-core — solo en merge a main o dispatch ────────────────
   deploy-core:
