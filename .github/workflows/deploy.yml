@@ -31,9 +31,9 @@ jobs:
         run: |
           docker run --rm \
             --entrypoint promtool \
-            -v ${{ github.workspace }}/monitoring-core/prometheus:/prometheus \
+            -v ${{ github.workspace }}/monitoring-core/prometheus:/etc/prometheus \
             prom/prometheus:latest \
-            check config /prometheus/prometheus.yml
+            check config /etc/prometheus/prometheus.yml
 
       - name: Validar configuración de Alertmanager
         run: |
