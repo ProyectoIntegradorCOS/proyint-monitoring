@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: thaqhiri
+    orgId: 1
+    folder: Thaqhiri
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
