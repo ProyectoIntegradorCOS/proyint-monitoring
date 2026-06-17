@@ -1,0 +1,77 @@
+groups:
+
+- name: thaqhiri-backend-alerts
+  rules:
+
+  - alert: BackendDown
+    expr: up{job="thaqhiri-backend"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "El backend de THAQHIRI no responde"
+      description: "Prometheus no puede alcanzar el endpoint /actuator/prometheus desde hace más de 1 minuto."
+
+  - alert: HighErrorRate
+    expr: |
+      (sum(rate(http_server_requests_seconds_count{job="thaqhiri-backend", status=~"5.."}[5m]))
+      /
+      sum(rate(http_server_requests_seconds_count{job="thaqhiri-backend"}[5m]))) * 100 > 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Tasa de error alta en el backend"
+      description: "Más del 5% de las peticiones están devolviendo errores 5xx en los últimos 5 minutos."
+
+  - alert: HighLatency
+    expr: |
+      histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="thaqhiri-backend"}[5m])) by (le)) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Latencia alta en el backend"
+      description: "El percentil 95 de latencia supera 1 segundo en los últimos 5 minutos."
+
+- name: thaqhiri-infra-alerts
+  rules:
+
+  - alert: HighCPUUsage
+    expr: |
+      100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Uso de CPU elevado en {{ $labels.instance }}"
+      description: "El uso de CPU supera el 80% durante más de 5 minutos."
+
+  - alert: HighMemoryUsage
+    expr: |
+      (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Uso de memoria elevado en {{ $labels.instance }}"
+      description: "El uso de memoria RAM supera el 85% durante más de 5 minutos."
+
+  - alert: LowDiskSpace
+    expr: |
+      (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100 > 85
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Espacio en disco bajo en {{ $labels.instance }}"
+      description: "El uso de disco supera el 85% en la partición raíz."
+
+  - alert: InstanceDown
+    expr: up{job=~"node-exporter.*"} == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instancia {{ $labels.instance }} no responde"
+      description: "Node Exporter no responde desde hace más de 2 minutos. La instancia podría estar caída."
