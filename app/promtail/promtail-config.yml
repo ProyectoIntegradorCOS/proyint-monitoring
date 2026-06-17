@@ -1,0 +1,35 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+# REEMPLAZAR IP: output de Terraform → monitoring_logs_private_ip (instancia thaqhiri-dev-monitoring-logs)
+- url: http://10.0.1.92:3100/loki/api/v1/push
+
+scrape_configs:
+
+- job_name: thaqhiri-backend-docker
+  docker_sd_configs:
+  - host: unix:///var/run/docker.sock
+    refresh_interval: 5s
+  relabel_configs:
+  - source_labels: [ '__meta_docker_container_name' ]
+    regex: '/(.*)'
+    target_label: 'container'
+  - source_labels: [ '__meta_docker_container_log_stream' ]
+    target_label: 'logstream'
+  pipeline_stages:
+  - docker: {}
+
+- job_name: system-logs
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: varlogs
+      environment: dev
+      instance_role: app
+      __path__: /var/log/*.log
