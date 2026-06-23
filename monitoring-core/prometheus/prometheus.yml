@@ -54,3 +54,12 @@ scrape_configs:
     labels:
       environment: 'dev'
       instance_role: 'monitoring-logs'
+
+# OTEL Collector — métricas del backend enrutadas via OpenTelemetry
+- job_name: 'otel-collector'
+  scrape_interval: 15s
+  static_configs:
+  - targets: [ '10.0.1.92:8889' ]
+    labels:
+      environment: 'dev'
+      service: 'otel-collector'
