@@ -15,14 +15,28 @@ services:
     networks:
       - monitoring
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: thaqhiri-otel-collector
+    restart: unless-stopped
+    ports:
+      - "4317:4317"   # OTLP gRPC  ← recibe trazas/métricas del backend
+      - "4318:4318"   # OTLP HTTP  ← recibe trazas/métricas del backend
+      - "8889:8889"   # Prometheus ← Prometheus scrapeará métricas aquí
+    volumes:
+      - ./otel-collector/otel-collector-config.yml:/etc/otel/config.yml:ro
+    command: ["--config=/etc/otel/config.yml"]
+    depends_on:
+      - jaeger
+    networks:
+      - monitoring
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: thaqhiri-jaeger
     restart: unless-stopped
     ports:
       - "16686:16686"   # UI
-      - "4317:4317"     # OTLP gRPC
-      - "4318:4318"     # OTLP HTTP
       - "14268:14268"   # Jaeger HTTP collector (legacy)
     environment:
       - COLLECTOR_OTLP_ENABLED=true
